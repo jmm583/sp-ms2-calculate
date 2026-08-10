@@ -139,11 +139,13 @@ async function calculate(req, res) {
         console.log("STUDY SCORE OP REQUESTED")
         console.log("HTTP REQUEST BODY: ", req.body)
 
-        const studyScore = studyScoreService.studyScore(
-            req.body.wifiScore, req.body.noiseScore,
-            req.body.seatingScore, req.body.outletScore,
-            req.body.overallRating
-        );
+        const studyScore = studyScoreService.studyScore({
+            wifiScore: req.body.wifiScore,
+            noiseScore: req.body.noiseScore,
+            seatingScore: req.body.seatingScore,
+            outletScore: req.body.outletScore,
+            overallRating: req.body.overallRating
+        });
 
         const httpResBody = {
             operationPerformed: req.body.operation,

@@ -70,5 +70,5 @@ async function testStudyScore() {
 };
 
 // testUnitConversion()
-testDistance()
-// testStudyScore()
+// testDistance()
+testStudyScore()
