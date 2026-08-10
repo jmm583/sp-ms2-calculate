@@ -35,7 +35,7 @@ Requests are sent using the Fetch API. An example below is provided
 Example Fetch(): 
 
     ```js
-        const response = await fetch("http://localhost:3000/calculate", {
+        const response = await fetch("http://localhost:3004/calculate", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -44,7 +44,7 @@ Example Fetch():
         });
     ```
 Client must send HTTP POST request to the `/calculate` route endpoint
-    `POST http://localhost:3000/calculate`
+    `POST http://localhost:3004/calculate`
     Request body is a JSON Object
 
 ### Unit Conversion Request Body
@@ -168,7 +168,7 @@ Example below showing the retieval of `convertedValue` from the UnitConversionSe
 2) Send an HTTP POST request to /calculate
 
     ```js
-    const response = await fetch('http://localhost:3000/calculate', {
+    const response = await fetch('http://localhost:3004/calculate', {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(http_req_body)
