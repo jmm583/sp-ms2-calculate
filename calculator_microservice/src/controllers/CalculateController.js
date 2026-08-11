@@ -66,62 +66,38 @@ async function calculate(req, res) {
             const kmDist = distanceService.kmDistance(meterDist);
             const miDist = distanceService.mileDistance(meterDist);
             
-            let httpResBody = {
-                operationPerformed: req.body.operation,
-                kmDist: kmDist
-            };
+            let httpResBody;
 
             // User story 2 function requirements
             // default to miles if unit key value is left empty from request body
             if (req.body.units == "km") {
-                const httpResBody = {
+                httpResBody = {
                     operationPerformed: req.body.operation,
                     kmDist: kmDist
                 }
                 console.log("HTTP RESPONSE BODY: ", httpResBody);
-                res.json({
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(httpResBody)
-                });
 
             } else if (req.body.units == "mi") {
-                const httpResBody = {
+                httpResBody = {
                     operationPerformed: req.body.operation,
                     miDist: miDist
                 }
                 console.log("HTTP RESPONSE BODY: ", httpResBody);
-                res.json({
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(httpResBody)
-                });
 
             } else if (req.body.units == "m") {
 
-                const httpResBody = {
+                httpResBody = {
                     operationPerformed: req.body.operation,
                     meterDist: meterDist,
                 }
                 console.log("HTTP RESPONSE BODY: ", httpResBody);
-                res.json({
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(httpResBody)
-                });
 
             } else if (req.body.units == "" || req.body.units === undefined) {
 
-                const httpResBody = {
+                httpResBody = {
                     operationPerformed: req.body.operation,
                     miDist: miDist
                 }
-                console.log("HTTP RESPONSE BODY: ", httpResBody);
-                res.json({
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(httpResBody)
-                });
 
             } else {
                 return res.status(400).json({
@@ -129,6 +105,14 @@ async function calculate(req, res) {
                     message: "Units must be km, m, or mi. An empty string is defaulted to mi"
                 })
             }
+            
+            console.log("HTTP RESPONSE BODY: ", httpResBody);
+            
+            res.json({
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(httpResBody)
+            });
 
         break;
     };
