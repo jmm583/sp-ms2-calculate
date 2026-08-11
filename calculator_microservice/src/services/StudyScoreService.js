@@ -1,13 +1,13 @@
 // Calculates a study suitability percentage from five ratings.
 // Each rating uses a scale from 0 (poor) to 5 (excellent).
 
-function studyScore(
+function studyScore({
     wifiScore,
     noiseScore,
     seatingScore,
     outletScore,
     overallRating
-) {
+}) {
     const scores = [
         wifiScore,
         noiseScore,
