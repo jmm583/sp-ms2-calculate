@@ -9,159 +9,221 @@ async function calculate(req, res) {
 
     switch (serviceOperation) {
 
-        // CALL CONVERT SERVICE FUNCTIONS
-        case "convert": {
-            console.log("CONVERT OP REQUESTED");
-            console.log("HTTP REQUEST BODY: ", req.body)
+        case "convert":
+            return processConvert(req, res);
 
-            const convertedUnitValue = unitConversionService.convertUnits(req.body.value, req.body.unitFrom, req.body.unitTo);
-            console.log(convertedUnitValue);
+        case "distance":
+            return processDistance(req, res);
 
-            httpResBody = {
-                operationPerformed: req.body.operation,
-                unitFrom: req.body.unitFrom,
-                unitTo: req.body.unitTo,
-                convertedValue: convertedUnitValue
-            };
-            console.log("CONVERT OP HTTP POST RESPONSE BODY", httpResBody);
+        case "studyScore":
+            return processStudyScore(req, res);
 
-            res.json({
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(httpResBody)
-            })
-
-            break;
-        };
-
-        // CALL DISTANCE SERVICE FUNCTIONS 
-        case "distance": {
-
-            console.log("DISTANCE OP REQUESTED")
-            console.log("HTTP REQUEST BODY: ", req.body)
-
-            const startLat = req.body.startLatitude,
-                startLon = req.body.startLongitude,
-                endLat = req.body.endLatitude,
-                endLon = req.body.endLongitude;
-
-            // functional requirement 2nd user story
-            // lat must be between -90 and 90, lon must be between -180 and 180
-            if (startLat < -90 || startLat > 90 ||
-                startLon < -180 || startLon > 180 ||
-                endLat < -90 || endLat > 90  ||
-                endLon < -180 || endLon > 180) {
-
-                return res.status(400).json({
-                    error: "Invalid coordinates",
-                    message: "Latitude coordinate must be between -90 and 90\nLongitude must be between -180 and 180"
-                })
-            }
-
-            const meterDist = distanceService.meterDistance(
-                { latitude: req.body.startLatitude, longitude: req.body.startLongitude },
-                { latitude: req.body.endLatitude, longitude: req.body.endLongitude }
-            );
-
-            const kmDist = distanceService.kmDistance(meterDist);
-            const miDist = distanceService.mileDistance(meterDist);
-            
-            let httpResBody = {
-                operationPerformed: req.body.operation,
-                kmDist: kmDist
-            };
-
-            // User story 2 function requirements
-            // default to miles if unit key value is left empty from request body
-            if (req.body.units == "km") {
-                const httpResBody = {
-                    operationPerformed: req.body.operation,
-                    kmDist: kmDist
-                }
-                console.log("HTTP RESPONSE BODY: ", httpResBody);
-                res.json({
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(httpResBody)
-                });
-
-            } else if (req.body.units == "mi") {
-                const httpResBody = {
-                    operationPerformed: req.body.operation,
-                    miDist: miDist
-                }
-                console.log("HTTP RESPONSE BODY: ", httpResBody);
-                res.json({
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(httpResBody)
-                });
-
-            } else if (req.body.units == "m") {
-
-                const httpResBody = {
-                    operationPerformed: req.body.operation,
-                    meterDist: meterDist,
-                }
-                console.log("HTTP RESPONSE BODY: ", httpResBody);
-                res.json({
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(httpResBody)
-                });
-
-            } else if (req.body.units == "" || req.body.units === undefined) {
-
-                const httpResBody = {
-                    operationPerformed: req.body.operation,
-                    miDist: miDist
-                }
-                console.log("HTTP RESPONSE BODY: ", httpResBody);
-                res.json({
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(httpResBody)
-                });
-
-            } else {
-                return res.status(400).json({
-                    error: "Invalid unit requested",
-                    message: "Units must be km, m, or mi. An empty string is defaulted to mi"
-                })
-            }
-
-        break;
-    };
-
-        // CALL STUDY SCORE SERVICE FUNCTIONS
-        case "studyScore": {
-
-        console.log("STUDY SCORE OP REQUESTED")
-        console.log("HTTP REQUEST BODY: ", req.body)
-
-        const studyScore = studyScoreService.studyScore(
-            req.body.wifiScore, req.body.noiseScore,
-            req.body.seatingScore, req.body.outletScore,
-            req.body.overallRating
-        );
-
-        const httpResBody = {
-            operationPerformed: req.body.operation,
-            studyScore: studyScore
-        };
-        console.log("STUDY SCORE OP HTTP RES BODY", httpResBody);
-
-
-        res.json({
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(httpResBody)
-        });
-
-        break;
-        };
+        default:
+            return res.status(400).json({
+                error: "Invalid operation",
+                message: "Operation must be convert, distance, or studyScore"
+            });
     }
 }
 
+
+//====================================
+// UNIT CONVERSION OPERATION FUNCTION
+//====================================
+function processConvert(req, res) {
+
+    console.log("CONVERT OP REQUESTED");
+    console.log("HTTP REQUEST BODY: ", req.body);
+
+    const convertedUnitValue = unitConversionService.convertUnits(
+        req.body.value,
+        req.body.unitFrom,
+        req.body.unitTo
+    );
+
+    const httpResBody = {
+        operationPerformed: req.body.operation,
+        unitFrom: req.body.unitFrom,
+        unitTo: req.body.unitTo,
+        convertedValue: convertedUnitValue
+    };
+
+    console.log("CONVERT OP HTTP POST RESPONSE BODY", httpResBody);
+
+    sendResponse(res, httpResBody);
+}
+
+
+//==============================
+// DISTANCE OPERATION FUNCTION
+//==============================
+function processDistance(req, res) {
+
+    console.log("DISTANCE OP REQUESTED");
+    console.log("HTTP REQUEST BODY: ", req.body);
+
+    const coordinates = getCoordinates(req);
+
+    // call validate coordinates helper function on req body coordinates
+    if (!validateCoordinates(coordinates)) {
+        return res.status(400).json({
+            error: "Invalid coordinates",
+            message: "Latitude coordinate must be between -90 and 90\nLongitude must be between -180 and 180"
+        });
+    }
+
+    const distances = calculateDistances(coordinates);
+
+    // call createDistanceResp helper function. Determines the correct unit to send back to client.
+    const httpResBody = createDistanceResp(
+        req.body.operation,
+        req.body.units,
+        distances
+    );
+
+    if (httpResBody.error) {
+        return res.status(400).json(httpResBody);
+    }
+
+    console.log("HTTP RESPONSE BODY: ", httpResBody);
+
+    sendResponse(res, httpResBody);
+}
+
+
+//=================================
+// STUDY SCORE OPERATION FUNCTION
+//=================================
+function processStudyScore(req, res) {
+
+    console.log("STUDY SCORE OP REQUESTED");
+    console.log("HTTP REQUEST BODY: ", req.body);
+
+    const studyScore = studyScoreService.studyScore(
+        req.body.wifiScore,
+        req.body.noiseScore,
+        req.body.seatingScore,
+        req.body.outletScore,
+        req.body.overallRating
+    );
+
+    const httpResBody = {
+        operationPerformed: req.body.operation,
+        studyScore: studyScore
+    };
+
+    console.log("STUDY SCORE OP HTTP RES BODY", httpResBody);
+
+    sendResponse(res, httpResBody);
+}
+
+
+//==============================
+// Universal Response Function
+//==============================
+function sendResponse(res, httpResBody) {
+    res.json({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(httpResBody)
+    });
+}
+
+
+//========================================
+// HELPER FUNCTIONS for PROCESS DISTANCE   
+//========================================
+
+// Get coordinates from client request body
+function getCoordinates(req) {
+
+    const coordinates = {
+        start: {
+            latitude: req.body.startLatitude,
+            longitude: req.body.startLongitude
+        },
+        end: {
+            latitude: req.body.endLatitude,
+            longitude: req.body.endLongitude
+        }
+    };
+
+    return coordinates;
+}
+
+
+// Validate Coordinates returned by getCoordinates()
+// if boolean false is returned processDistance instantly sends 400 response
+function validateCoordinates(coordinates) {
+
+    const startLat = coordinates.start.latitude;
+    const startLon = coordinates.start.longitude;
+    const endLat = coordinates.end.latitude;
+    const endLon = coordinates.end.longitude;
+
+    // returns true if all conditions are met
+
+    if (
+        startLat >= -90 && startLat <= 90 &&
+        startLon >= -180 && startLon <= 180 &&
+        endLat >= -90 && endLat <= 90 &&
+        endLon >= -180 && endLon <= 180
+    ) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
+
+// Calculate Distance by calling functions from DistanceService.js
+function calculateDistances(coordinates) {
+
+    const meterDist = distanceService.meterDistance(
+        coordinates.start,
+        coordinates.end
+    );
+
+    return {
+        meterDist: meterDist,
+        kmDist: distanceService.kmDistance(meterDist),
+        miDist: distanceService.mileDistance(meterDist)
+    };
+}
+
+// Switch statement for requested distance unit
+function createDistanceResp(operation, units, distances) {
+
+    switch (units) {
+
+        case "km":
+            return {
+                operationPerformed: operation,
+                kmDist: distances.kmDist
+            };
+
+        case "mi":
+            return {
+                operationPerformed: operation,
+                miDist: distances.miDist
+            };
+
+        case "m":
+            return {
+                operationPerformed: operation,
+                meterDist: distances.meterDist
+            };
+
+        case "":
+        case undefined:
+            return {
+                operationPerformed: operation,
+                miDist: distances.miDist
+            };
+
+        default:
+            return null;
+    }
+};
 
 module.exports = { calculate };
