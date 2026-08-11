@@ -14,7 +14,11 @@ async function calculate(req, res) {
             console.log("CONVERT OP REQUESTED");
             console.log("HTTP REQUEST BODY: ", req.body)
 
-            const convertedUnitValue = unitConversionService.convertUnits(req.body.value, req.body.unitFrom, req.body.unitTo);
+            const convertedUnitValue = unitConversionService.convertUnits(
+                req.body.value, 
+                req.body.unitFrom, 
+                req.body.unitTo
+            );
             console.log(convertedUnitValue);
 
             httpResBody = {
